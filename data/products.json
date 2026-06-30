@@ -1,0 +1,128 @@
+[
+  {
+    "id": "plus-topup",
+    "type": "chatgpt",
+    "tag": "入门",
+    "name": "ChatGPT Plus 充值",
+    "desc": "适合日常对话、写作、作图与轻度编程的个人使用场景",
+    "price": 168,
+    "original": 252,
+    "period": "/月 30天",
+    "accent": "#6cff3d",
+    "featured": false,
+    "features": [
+      "GPT-5.5 / GPT-5.2 / GPT-5",
+      "Images 2.0 图像生成",
+      "轻度编程辅助",
+      "每 3 小时 150 条消息"
+    ]
+  },
+  {
+    "id": "plus-ready",
+    "type": "chatgpt",
+    "tag": "精选",
+    "name": "ChatGPT Plus 成品",
+    "desc": "直登官方账号，开立即用，适合无账号需快捷使用的个人使用场景",
+    "price": 176,
+    "original": 268,
+    "period": "/月 30天",
+    "accent": "#f6e95f",
+    "featured": true,
+    "features": [
+      "GPT-5.5 / GPT-5.2 / GPT-5 访问",
+      "Images 2.0 图像生成",
+      "独立一人，独立使用",
+      "ChatGPT Plus 完整会员权益"
+    ]
+  },
+  {
+    "id": "pro-5x",
+    "type": "chatgpt",
+    "tag": "进阶版",
+    "name": "ChatGPT Pro 5X 充值",
+    "desc": "适合重度使用 AI 的开发者、创作者与研究使用场景",
+    "price": 825,
+    "original": 1050,
+    "period": "/月 30天",
+    "accent": "#54d9ff",
+    "featured": false,
+    "features": [
+      "消息额度 5 倍 Plus",
+      "高强度编程辅助",
+      "GPT-5.5 优先访问",
+      "Images 2.0 完整功能"
+    ]
+  },
+  {
+    "id": "pro-20x",
+    "type": "chatgpt",
+    "tag": "顶级版",
+    "name": "ChatGPT Pro 20X 充值",
+    "desc": "适合企业、研究与超高频工作流，支持合作与提供报销收据",
+    "price": 1480,
+    "original": 1880,
+    "period": "/月 30天",
+    "accent": "#ff6f61",
+    "featured": false,
+    "features": [
+      "消息额度 20 倍 / 接近无限",
+      "Images 2.0 + 4K 升级",
+      "GPT-5.5 最高优先级",
+      "支持合作与报销收据"
+    ]
+  },
+  {
+    "id": "claude-pro",
+    "type": "claude",
+    "tag": "Claude Pro",
+    "name": "Claude Pro 订阅",
+    "desc": "适合日常写作、研究、代码问答与跨设备使用的 Claude 个人订阅",
+    "price": 188,
+    "original": 268,
+    "period": "/月 30天",
+    "accent": "#ffb86b",
+    "featured": false,
+    "features": [
+      "官方月付参考 $20",
+      "更多使用额度",
+      "包含 Claude Code",
+      "Research、Projects 与更多模型能力"
+    ]
+  },
+  {
+    "id": "claude-max-5x",
+    "type": "claude",
+    "tag": "Max 5X",
+    "name": "Claude Max 5X 订阅",
+    "desc": "适合频繁使用 Claude 写代码、分析材料和处理复杂工作的高频用户",
+    "price": 880,
+    "original": 1180,
+    "period": "/月 30天",
+    "accent": "#c8a2ff",
+    "featured": true,
+    "features": [
+      "官方月付参考 $100",
+      "约 5 倍 Pro 使用额度",
+      "更高输出限制",
+      "高峰期优先访问"
+    ]
+  },
+  {
+    "id": "claude-max-20x",
+    "type": "claude",
+    "tag": "Max 20X",
+    "name": "Claude Max 20X 订阅",
+    "desc": "适合长时间编码、研究和企业级个人工作流的超高频使用场景",
+    "price": 1680,
+    "original": 2280,
+    "period": "/月 30天",
+    "accent": "#ff8fbd",
+    "featured": false,
+    "features": [
+      "官方月付参考 $200",
+      "约 20 倍 Pro 使用额度",
+      "高级功能早期访问",
+      "适合重度 Claude Code 工作流"
+    ]
+  }
+]

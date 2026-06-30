@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXAI20X 后台管理</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <section class="login-shell" id="loginShell">
+      <form class="login-card" id="loginForm">
+        <strong>N</strong>
+        <h1>后台登录</h1>
+        <label>
+          <span>账号</span>
+          <input name="username" autocomplete="username" required />
+        </label>
+        <label>
+          <span>密码</span>
+          <input name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">登录</button>
+      </form>
+    </section>
+
+    <div class="admin-layout" id="adminLayout" hidden>
+      <aside class="admin-sidebar" id="adminSidebar" aria-label="后台菜单">
+        <a class="sidebar-brand" href="#overview">
+          <strong>N</strong>
+          <span>NEXAI20X</span>
+        </a>
+        <nav class="sidebar-nav">
+          <p>菜单</p>
+          <a href="#overview" data-section-link="overview"><b>总</b><span>总览</span></a>
+          <a href="#orders" data-section-link="orders"><b>单</b><span>订单查询</span></a>
+          <a href="#products" data-section-link="products"><b>价</b><span>价格调整</span></a>
+          <p>运营</p>
+          <a href="#site-config" data-section-link="site-config"><b>收</b><span>收款联系</span></a>
+          <a href="#content" data-section-link="content"><b>文</b><span>新闻播客</span></a>
+        </nav>
+        <a class="sidebar-exit" href="/"><span>返回前台</span></a>
+      </aside>
+
+      <div class="admin-workspace">
+        <header class="admin-header">
+          <label class="admin-search">
+            <span>搜索</span>
+            <input id="globalSearch" placeholder="搜索订单号、联系方式或商品" />
+          </label>
+          <nav>
+            <button class="icon-button" type="button" id="reloadBtn" aria-label="刷新数据" title="刷新数据">↻</button>
+            <strong>Admin</strong>
+          </nav>
+        </header>
+
+        <main class="admin-shell">
+          <section class="admin-page" id="overview" data-page="overview">
+            <div class="dashboard-head">
+              <div>
+                <h1>运营总览</h1>
+              </div>
+            </div>
+
+            <section class="stats-grid">
+              <div id="statsGrid"></div>
+            </section>
+
+            <section class="dashboard-grid overview-grid" aria-label="运营看板">
+              <article class="panel revenue-panel">
+                <div class="panel-head split">
+                  <div>
+                    <h1>订单趋势</h1>
+                  </div>
+                </div>
+                <div class="mini-bars" id="miniBars"></div>
+              </article>
+              <article class="panel income-panel">
+                <div class="panel-head">
+                  <div>
+                    <h1>收入概览</h1>
+                  </div>
+                </div>
+                <div class="income-list" id="incomeList"></div>
+              </article>
+              <article class="panel visitor-panel">
+                <div class="panel-head split">
+                  <div>
+                    <h1>访客趋势</h1>
+                  </div>
+                  <span class="panel-chip" id="visitorToday">今日 0</span>
+                </div>
+                <div class="visitor-chart" id="visitorChart"></div>
+              </article>
+              <article class="panel visitor-total">
+                <div class="panel-head">
+                  <div>
+                    <h1>累计访客</h1>
+                  </div>
+                </div>
+                <strong id="visitorTotal">0</strong>
+              </article>
+            </section>
+          </section>
+
+      <section class="admin-page panel" id="products" data-page="products">
+        <div class="panel-head">
+          <div>
+            <h1>前台价格调整</h1>
+            <p>修改后会写入 <code>data/products.json</code>，前台商品卡片和新订单金额会同步使用。</p>
+          </div>
+        </div>
+        <div class="product-admin-grid" id="productList"></div>
+        <div class="product-pager" id="productPager" aria-label="商品分页"></div>
+      </section>
+
+      <section class="admin-page panel" id="orders" data-page="orders">
+        <div class="panel-head split">
+          <div>
+            <h1>近期订单</h1>
+            <p>支持按订单号或联系方式检索，并可更新订单处理状态。</p>
+          </div>
+          <form class="search-form" id="orderSearchForm">
+            <input name="keyword" placeholder="订单号 / 手机号 / 邮箱" />
+            <button type="submit">查询</button>
+          </form>
+        </div>
+        <div class="order-list" id="orderList"></div>
+      </section>
+
+      <section class="admin-page panel" id="site-config" data-page="site-config">
+        <div class="panel-head">
+          <div>
+            <h1>收款码及联系方式</h1>
+            <p>修改后会写入 <code>data/site-config.json</code>，前台支付二维码、页脚和客服弹窗会同步使用。</p>
+          </div>
+        </div>
+        <form class="site-config-form" id="siteConfigForm">
+          <div class="field-grid">
+            <label>
+              <span>支付宝收款码地址</span>
+              <span class="upload-field">
+                <input name="alipayQr" placeholder="assets/qr-alipay.svg 或完整图片 URL" />
+                <button type="button" data-upload-target="alipayQr">上传</button>
+              </span>
+            </label>
+            <label>
+              <span>微信收款码地址</span>
+              <span class="upload-field">
+                <input name="wechatQr" placeholder="assets/qr-wechat.svg 或完整图片 URL" />
+                <button type="button" data-upload-target="wechatQr">上传</button>
+              </span>
+            </label>
+            <label>
+              <span>USDT 收款码地址</span>
+              <span class="upload-field">
+                <input name="usdtQr" placeholder="assets/qr-usdt.svg 或完整图片 URL" />
+                <button type="button" data-upload-target="usdtQr">上传</button>
+              </span>
+            </label>
+            <label>
+              <span>售后客服二维码地址</span>
+              <span class="upload-field">
+                <input name="supportQr" placeholder="assets/qr-support.svg 或完整图片 URL" />
+                <button type="button" data-upload-target="supportQr">上传</button>
+              </span>
+            </label>
+            <label>
+              <span>企业采购二维码地址</span>
+              <span class="upload-field">
+                <input name="salesQr" placeholder="assets/qr-sales.svg 或完整图片 URL" />
+                <button type="button" data-upload-target="salesQr">上传</button>
+              </span>
+            </label>
+            <label>
+              <span>售后客服名称</span>
+              <input name="supportLabel" placeholder="售后客服" />
+            </label>
+            <label>
+              <span>企业采购名称</span>
+              <input name="salesLabel" placeholder="企业采购" />
+            </label>
+          </div>
+          <label>
+            <span>联系方式说明</span>
+            <textarea name="supportText" rows="3" placeholder="添加客服微信获取帮助，工作时间 9:00 至 24:00。"></textarea>
+          </label>
+          <input id="qrUploadInput" type="file" accept="image/*" hidden />
+          <button type="submit">保存收款码及联系方式</button>
+        </form>
+      </section>
+
+      <section class="admin-page panel" id="content" data-page="content">
+        <div class="panel-head split">
+          <div>
+            <h1>新闻与播客发布</h1>
+          </div>
+        </div>
+        <div class="content-layout">
+          <form class="content-form" id="contentForm">
+            <input type="hidden" name="id" />
+            <label>
+              <span>内容类型</span>
+              <select name="type">
+                <option value="news">新闻</option>
+                <option value="podcast">播客</option>
+              </select>
+            </label>
+            <label>
+              <span>作者 / 栏目</span>
+              <input name="author" required placeholder="例如：NEXAI20X 官方博客" />
+            </label>
+            <label>
+              <span>标题</span>
+              <input name="title" required placeholder="文章或播客标题" />
+            </label>
+            <label>
+              <span>摘要</span>
+              <textarea name="intro" required rows="3" placeholder="显示在前台卡片上的摘要"></textarea>
+            </label>
+            <label>
+              <span>正文 / 播客介绍</span>
+              <textarea name="body" rows="6" placeholder="阅读全文弹窗中的正文内容"></textarea>
+            </label>
+            <label>
+              <span>播客音频地址</span>
+              <input name="audioUrl" placeholder="仅播客需要，可留空" />
+            </label>
+            <button type="submit">发布内容</button>
+          </form>
+          <div class="content-list" id="contentList"></div>
+        </div>
+      </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="admin.js"></script>
+  </body>
+</html>

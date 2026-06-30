@@ -1,0 +1,17 @@
+[
+  {
+    "id": "ORD-20260624152834-MVHW",
+    "productId": "codex-starter",
+    "productName": "Codex Agent 充值",
+    "amount": 128,
+    "contact": "15715322267",
+    "payment": "wechat",
+    "status": "支付已提交，待人工交付",
+    "time": "2026-06-24 15:28:34",
+    "createdAt": "2026-06-24 15:28:34",
+    "updatedAt": "2026-06-24 15:28:39",
+    "paymentMode": "mock",
+    "gatewayPrepayId": "MOCK-wechat-1782286118330",
+    "paidAt": "2026-06-24 15:28:39"
+  }
+]

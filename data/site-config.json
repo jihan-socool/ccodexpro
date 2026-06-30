@@ -1,0 +1,14 @@
+{
+  "paymentQrs": {
+    "alipay": "assets/qr-alipay.svg",
+    "wechat": "assets/qr-wechat.svg",
+    "usdt": "assets/qr-usdt.svg"
+  },
+  "contacts": {
+    "supportText": "添加客服微信获取帮助，工作时间 9:00 至 24:00。",
+    "supportQr": "assets/qr-support.svg",
+    "salesQr": "assets/qr-sales.svg",
+    "supportLabel": "售后客服",
+    "salesLabel": "企业采购"
+  }
+}

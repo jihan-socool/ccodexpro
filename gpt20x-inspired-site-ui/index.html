@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXAI20X - ChatGPT、Claude 与 Codex 订阅补给站</title>
+    <meta
+      name="description"
+      content="ChatGPT Plus、Pro、Claude Pro、Claude Max 与 Codex 订阅充值服务，支持套餐选择、下单、支付、订单查询和完整售后说明。"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#/" data-route="/">
+        <span class="brand-mark">N</span>
+        <span>
+          <strong>NEXAI20X</strong>
+          <small>订阅充值服务</small>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="主导航">
+        <a href="#/query" data-route="/query">购买记录</a>
+        <button type="button" data-action="claude">Claude订阅</button>
+        <button type="button" data-action="codex">Codex充值</button>
+        <a href="#/blog" data-route="/blog">新闻博客</a>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-chip" type="button" data-action="language">ZH</button>
+        <button class="menu-toggle" type="button" aria-label="打开菜单" data-action="menu">
+          <span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+      <a href="#/query" data-route="/query">购买记录</a>
+      <button type="button" data-action="claude">Claude订阅</button>
+      <button type="button" data-action="codex">Codex充值</button>
+      <a href="#/blog" data-route="/blog">新闻博客</a>
+      <a href="#/faq" data-route="/faq">常见问题</a>
+    </div>
+
+    <main id="app" tabindex="-1"></main>
+
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div>
+          <a class="brand footer-brand" href="#/" data-route="/">
+            <span class="brand-mark">N</span>
+            <span>
+              <strong>NEXAI20X</strong>
+              <small>AI 订阅充值服务</small>
+            </span>
+          </a>
+          <p>© 2025-2026 NEXAI20X. All rights reserved.</p>
+        </div>
+        <div>
+          <h4>服务</h4>
+          <a href="#/" data-route="/">ChatGPT Plus 充值服务</a>
+          <button type="button" data-action="claude">Claude订阅</button>
+          <button type="button" data-action="codex">Codex充值</button>
+        </div>
+        <div>
+          <h4>帮助与支持</h4>
+          <a href="#/faq" data-route="/faq">常见问题</a>
+          <a href="#/help" data-route="/help">售后政策</a>
+          <a href="#/priv" data-route="/priv">隐私政策</a>
+          <a href="#/tos" data-route="/tos">服务条款</a>
+        </div>
+        <div>
+          <h4>联系我们</h4>
+          <p>添加客服微信获取帮助，工作时间 9:00 至 24:00。</p>
+          <div class="qr-row">
+            <img src="assets/qr-support.svg" alt="客服二维码" />
+            <img src="assets/qr-sales.svg" alt="企业采购二维码" />
+          </div>
+        </div>
+      </div>
+      <p class="disclaimer">
+        重要声明：本站为仿站设计演示，不是 ChatGPT、OpenAI、Claude 或 Anthropic 官方网站，未与相关官方主体存在授权、代理或合作关系。
+        页面仅模拟账号/激活码相关购买与服务信息。
+      </p>
+    </footer>
+
+    <button class="support-fab" type="button" aria-label="联系客服" data-action="support">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 11.2C4 6.7 7.7 3 12.2 3s8.2 3.7 8.2 8.2-3.7 8.2-8.2 8.2c-1 0-2-.2-2.9-.5L4 21l1.8-5.1A8 8 0 0 1 4 11.2Z" />
+        <path d="M8.7 10.6h7M8.7 13.7h4.8" />
+      </svg>
+    </button>
+
+    <div class="modal" id="modal" aria-hidden="true">
+      <div class="modal-backdrop" data-action="close-modal"></div>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" type="button" aria-label="关闭" data-action="close-modal">×</button>
+        <div id="modalContent"></div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
