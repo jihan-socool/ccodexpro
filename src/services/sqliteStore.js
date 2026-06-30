@@ -14,11 +14,17 @@ function getDbPath() {
   return process.env.SQLITE_PATH || defaultDbPath;
 }
 
+function ensureParentDir(filePath) {
+  const parentDir = path.dirname(filePath);
+  if (!fs.existsSync(parentDir)) fs.mkdirSync(parentDir, { recursive: true });
+}
+
 function getDb() {
   if (!sqliteEnabled()) return null;
   if (database) return database;
 
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  ensureParentDir(getDbPath());
   const Database = require("better-sqlite3");
   database = new Database(getDbPath());
   database.pragma("journal_mode = WAL");

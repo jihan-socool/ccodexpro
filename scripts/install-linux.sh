@@ -8,7 +8,9 @@ PORT="${PORT:-4173}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
 DATA_STORE="${DATA_STORE:-sqlite}"
-SQLITE_PATH="${SQLITE_PATH:-$APP_DIR/data/app.sqlite}"
+DATA_DIR="${DATA_DIR:-/opt/nexai20x-data}"
+SQLITE_PATH="${SQLITE_PATH:-$DATA_DIR/app.sqlite}"
+SOURCE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 if [[ $EUID -ne 0 ]]; then
   echo "Please run as root: sudo bash scripts/install-linux.sh"
@@ -54,14 +56,27 @@ fi
 
 echo "==> Preparing app directory: $APP_DIR"
 mkdir -p "$APP_DIR"
-rsync -a --delete \
-  --exclude node_modules \
-  --exclude .git \
-  --exclude .env \
-  ./ "$APP_DIR/"
+mkdir -p "$DATA_DIR"
+
+if [[ "$SOURCE_DIR" != "$APP_DIR" ]]; then
+  rsync -a --delete \
+    --exclude node_modules \
+    --exclude .git \
+    --exclude .env \
+    --exclude data \
+    --exclude backups \
+    --exclude logs \
+    "$SOURCE_DIR/" "$APP_DIR/"
+else
+  echo "==> Source dir matches app dir, skipping rsync sync"
+fi
 
 cd "$APP_DIR"
-mkdir -p data logs backups
+mkdir -p logs backups
+
+if [[ ! -d data ]]; then
+  mkdir -p data
+fi
 
 if [[ ! -f .env ]]; then
   cat > .env <<EOF
@@ -122,10 +137,13 @@ cat > "$APP_DIR/backup.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
+DATA_DIR="${DATA_DIR:-/opt/nexai20x-data}"
 BACKUP_DIR="$APP_DIR/backups"
 mkdir -p "$BACKUP_DIR"
 tar -czf "$BACKUP_DIR/nexai20x-$(date +%F-%H%M%S).tar.gz" \
-  -C "$APP_DIR" data assets .env
+  -C "$APP_DIR" assets .env \
+  $( [[ -d "$APP_DIR/data" ]] && printf '%s ' data ) \
+  $( [[ -d "$DATA_DIR" ]] && printf '%s ' "-C $DATA_DIR ." )
 find "$BACKUP_DIR" -type f -name 'nexai20x-*.tar.gz' -mtime +14 -delete
 EOF
 chmod +x "$APP_DIR/backup.sh"

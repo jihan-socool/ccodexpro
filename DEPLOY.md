@@ -8,6 +8,7 @@
 - PM2 守护 Node 进程
 - Caddy 自动 HTTPS
 - SQLite 存储：`DATA_STORE=sqlite`
+- 持久化数据目录独立：默认 `/opt/nexai20x-data`
 
 ## 一键部署
 
@@ -48,7 +49,7 @@ HOST=127.0.0.1
 PORT=4173
 
 DATA_STORE=sqlite
-SQLITE_PATH=/opt/nexai20x/data/app.sqlite
+SQLITE_PATH=/opt/nexai20x-data/app.sqlite
 
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=强密码
@@ -113,7 +114,7 @@ sudo ufw enable
 
 ```env
 DATA_STORE=sqlite
-SQLITE_PATH=/opt/nexai20x/data/app.sqlite
+SQLITE_PATH=/opt/nexai20x-data/app.sqlite
 ```
 
 首次启动时会自动创建 SQLite 文件，并从现有 `data/*.json` 种子数据导入：
@@ -125,3 +126,25 @@ SQLITE_PATH=/opt/nexai20x/data/app.sqlite
 - `visitors.json`
 
 如果你已经在生产跑了一段时间，切换 SQLite 前先备份 `data/`。
+
+## 后续升级
+
+推荐方式：
+
+```bash
+cd /opt/nexai20x
+git pull origin main
+sudo APP_DIR=/opt/nexai20x DATA_DIR=/opt/nexai20x-data bash scripts/install-linux.sh
+```
+
+这个升级路径会：
+
+- 覆盖代码
+- 保留现有 `.env`
+- 保留项目内 `data/`
+- 保留项目外 SQLite 与其他持久化文件
+- 重新安装依赖并重启 PM2
+
+如果你的 `.env` 里已经设置了自定义 `SQLITE_PATH`，脚本不会改写它。
+
+脚本已经兼容“在项目目录内直接执行”的场景。也就是说，`git pull` 完后直接执行上面的命令即可，不会把当前目录再错误同步到自己身上。
