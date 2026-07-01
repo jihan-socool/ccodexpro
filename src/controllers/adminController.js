@@ -4,6 +4,11 @@ const { readContent, saveContentItem } = require("../services/contentService");
 const { readHelpContent, writeHelpContent } = require("../services/helpContentService");
 const { readSiteConfig, writeSiteConfig } = require("../services/siteConfigService");
 const { visitorSummary } = require("../services/visitorService");
+const {
+  getSystemUpdateStatus,
+  checkSystemUpdates,
+  runSystemUpdate,
+} = require("../services/systemUpdateService");
 const { createAdminSession, validateAdminCredentials } = require("../middleware/adminAuth");
 
 const contentTypes = ["news", "podcast"];
@@ -29,6 +34,7 @@ function getAdminOverview(req, res) {
     siteConfig: readSiteConfig(),
     helpContent: readHelpContent(),
     visitors: visitorSummary(),
+    systemStatus: getSystemUpdateStatus(),
   });
 }
 
@@ -196,6 +202,19 @@ function updateAdminHelpContent(req, res) {
   res.json({ helpContent });
 }
 
+function getAdminSystemStatus(req, res) {
+  res.json({ systemStatus: getSystemUpdateStatus() });
+}
+
+function checkAdminSystemUpdates(req, res) {
+  res.json({ systemStatus: checkSystemUpdates() });
+}
+
+function runAdminSystemUpdate(req, res) {
+  const requestedBy = String(req.adminUser || process.env.ADMIN_USERNAME || "admin").trim() || "admin";
+  res.json({ systemStatus: runSystemUpdate(requestedBy) });
+}
+
 module.exports = {
   loginAdmin,
   getAdminOverview,
@@ -206,4 +225,7 @@ module.exports = {
   saveAdminContent,
   updateAdminSiteConfig,
   updateAdminHelpContent,
+  getAdminSystemStatus,
+  checkAdminSystemUpdates,
+  runAdminSystemUpdate,
 };

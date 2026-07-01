@@ -60,6 +60,26 @@ PAYMENT_MODE=mock
 
 正式支付时再配置支付宝、微信、USDT 环境变量。
 
+## 后台检查更新
+
+如果你希望在后台“系统设置”里直接检查更新并触发升级，需要额外配置：
+
+```env
+ADMIN_UPDATE_ENABLED=1
+ADMIN_UPDATE_REMOTE=origin
+ADMIN_UPDATE_BRANCH=main
+ADMIN_UPDATE_ALLOW_DIRTY=0
+ADMIN_UPDATE_SHELL=/bin/bash
+ADMIN_UPDATE_COMMAND=git pull --ff-only origin main && sudo APP_DIR=/opt/nexai20x DATA_DIR=/opt/nexai20x-data bash scripts/install-linux.sh
+```
+
+注意：
+
+- `ADMIN_UPDATE_COMMAND` 是后台点击“执行更新”时真正运行的命令，应当包含 `git pull`、依赖安装和服务重启。
+- 如果当前 Node/PM2 运行用户执行 `sudo ... bash scripts/install-linux.sh` 需要密码，这个后台更新会失败。
+- 生产环境通常需要在 `sudoers` 里只对白名单命令放开 `NOPASSWD`，不要直接给全量免密 sudo。
+- 如果服务器不是用 PM2 + `scripts/install-linux.sh` 部署，改成你自己的升级脚本即可。
+
 ## 常用命令
 
 ```bash

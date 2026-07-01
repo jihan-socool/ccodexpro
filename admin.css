@@ -912,7 +912,10 @@ textarea:focus {
 }
 
 .help-editor-scroll {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-content: start;
   gap: 1rem;
   flex: 1 1 auto;
   min-height: 0;
@@ -924,7 +927,9 @@ textarea:focus {
 }
 
 .help-editor-section {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 0.8rem;
   border: 2px dashed #d8ccb4;
   border-radius: 8px;
@@ -945,6 +950,14 @@ textarea:focus {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+.help-editor-panel .full-span {
+  min-width: 0;
+}
+
+.help-editor-panel textarea {
+  min-height: 240px;
+}
+
 .help-editor-actions {
   display: flex;
   flex: 0 0 auto;
@@ -957,6 +970,71 @@ textarea:focus {
 
 .ghost-button {
   background: #fffef9;
+}
+
+.system-status-card {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.system-status-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.system-status-view {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.system-status-panel {
+  display: grid;
+  gap: 0.65rem;
+  border: 2px dashed #d8ccb4;
+  border-radius: 8px;
+  background: rgba(255, 248, 231, 0.46);
+  padding: 0.9rem;
+}
+
+.system-status-panel h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.system-status-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 116px) minmax(0, 1fr);
+  gap: 0.55rem;
+  align-items: start;
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.system-status-row strong {
+  color: var(--ink);
+  font-weight: 950;
+}
+
+.system-status-row code,
+.system-status-row span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.system-status-note {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-weight: 800;
+}
+
+.system-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
 }
 
 #content {
@@ -1038,6 +1116,10 @@ textarea:focus {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .system-status-view {
+    grid-template-columns: 1fr;
+  }
+
   #overview .revenue-panel,
   #overview .income-panel,
   #overview .visitor-panel,
@@ -1110,7 +1192,8 @@ textarea:focus {
   .order-actions,
   .content-list,
   #overview .overview-grid,
-  .help-module-grid {
+  .help-module-grid,
+  .system-status-view {
     grid-template-columns: 1fr;
   }
 

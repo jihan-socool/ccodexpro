@@ -31,7 +31,8 @@ function verifyAdminSession(token) {
 
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    return data.exp && Date.now() < Number(data.exp);
+    if (!data.exp || Date.now() >= Number(data.exp)) return false;
+    return data;
   } catch (error) {
     return false;
   }
@@ -48,9 +49,16 @@ function adminAuth(req, res, next) {
   const legacyToken = process.env.ADMIN_TOKEN;
   const providedSession = req.get("X-Admin-Session") || "";
   const providedLegacy = req.get("X-Admin-Token") || req.query.adminToken;
+  const session = verifyAdminSession(providedSession);
 
-  if (verifyAdminSession(providedSession)) return next();
-  if (legacyToken && providedLegacy && safeEqual(providedLegacy, legacyToken)) return next();
+  if (session) {
+    req.adminUser = session.username || process.env.ADMIN_USERNAME || "admin";
+    return next();
+  }
+  if (legacyToken && providedLegacy && safeEqual(providedLegacy, legacyToken)) {
+    req.adminUser = process.env.ADMIN_USERNAME || "admin";
+    return next();
+  }
 
   return res.status(401).json({ error: "请先登录后台" });
 }
