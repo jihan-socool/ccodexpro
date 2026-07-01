@@ -36,6 +36,7 @@
           <a href="#products" data-section-link="products"><b>价</b><span>价格调整</span></a>
           <p>运营</p>
           <a href="#site-config" data-section-link="site-config"><b>收</b><span>收款联系</span></a>
+          <a href="#help-content" data-section-link="help-content"><b>帮</b><span>帮助支持</span></a>
           <a href="#content" data-section-link="content"><b>文</b><span>新闻播客</span></a>
         </nav>
         <a class="sidebar-exit" href="/"><span>返回前台</span></a>
@@ -186,6 +187,168 @@
           </label>
           <input id="qrUploadInput" type="file" accept="image/*" hidden />
           <button type="submit">保存收款码及联系方式</button>
+        </form>
+      </section>
+
+      <section class="admin-page panel" id="help-content" data-page="help-content">
+        <div class="panel-head">
+          <div>
+            <h1>帮助与支持</h1>
+            <p>修改后会写入 <code>data/help-content.json</code>，前台帮助中心、三份政策页面和下单风险确认文案会同步使用。</p>
+          </div>
+        </div>
+        <div class="help-module-grid" id="helpModuleGrid"></div>
+
+        <form class="help-editor-modal" id="helpContentForm" hidden>
+          <div class="help-editor-backdrop" data-close-help-editor></div>
+          <div class="help-editor-shell">
+            <header class="help-editor-head">
+              <div>
+                <strong id="helpEditorLabel">帮助与支持</strong>
+                <p id="helpEditorHint">在弹层内直接编辑并保存。</p>
+              </div>
+              <button class="icon-button help-editor-close" type="button" aria-label="关闭编辑器" data-close-help-editor>×</button>
+            </header>
+
+            <section class="help-editor-panel" data-help-panel="faq" hidden>
+              <div class="help-editor-scroll">
+                <div class="help-editor-section">
+                  <h2>首页入口</h2>
+                  <div class="field-grid">
+                    <label>
+                      <span>模块标题</span>
+                      <input name="showcaseTitle" placeholder="帮助中心改成一份实验手册。" />
+                    </label>
+                    <label>
+                      <span>常见问题提示</span>
+                      <input name="faqHint" placeholder="安全、价格、交付、接口说明" />
+                    </label>
+                    <label class="full-span">
+                      <span>模块说明</span>
+                      <textarea name="showcaseDescription" rows="3" placeholder="常见问题、售后政策、隐私政策和服务条款都在同一个支持体系里。"></textarea>
+                    </label>
+                    <label>
+                      <span>售后政策提示</span>
+                      <input name="helpHint" placeholder="退款、补发、质保、争议处理" />
+                    </label>
+                    <label>
+                      <span>隐私政策提示</span>
+                      <input name="privacyHint" placeholder="数据最小化、支付数据与删除" />
+                    </label>
+                    <label class="full-span">
+                      <span>服务条款提示</span>
+                      <input name="termsHint" placeholder="服务边界、支付回调与免责声明" />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="help-editor-section">
+                  <h2>FAQ 页面</h2>
+                  <div class="field-grid">
+                    <label>
+                      <span>眉标题</span>
+                      <input name="faqEyebrow" placeholder="Support Manual" />
+                    </label>
+                    <label>
+                      <span>目录标题</span>
+                      <input name="faqNavTitle" placeholder="手册目录" />
+                    </label>
+                    <label class="full-span">
+                      <span>页面标题</span>
+                      <input name="faqTitle" placeholder="异维补给手册。" />
+                    </label>
+                    <label class="full-span">
+                      <span>页面说明</span>
+                      <textarea name="faqDescription" rows="3" placeholder="购买前最容易犹豫的事都在这里：安全、价格、交付、退款、订单查询和支付接口。"></textarea>
+                    </label>
+                    <label class="full-span">
+                      <span>FAQ 分组 JSON</span>
+                      <textarea name="faqGroups" rows="14" spellcheck="false"></textarea>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <footer class="help-editor-actions">
+                <button type="button" class="ghost-button" data-close-help-editor>取消</button>
+                <button type="submit">保存 FAQ</button>
+              </footer>
+            </section>
+
+            <section class="help-editor-panel" data-help-panel="help" hidden>
+              <div class="help-editor-scroll">
+                <div class="help-editor-section">
+                  <h2>售后政策 Markdown</h2>
+                  <label class="full-span">
+                    <span>上传 Markdown 文件</span>
+                    <span class="upload-field">
+                      <input name="helpMarkdownName" placeholder="未选择文件" readonly />
+                      <button type="button" data-markdown-upload="help">上传 .md</button>
+                    </span>
+                  </label>
+                  <label class="full-span">
+                    <span>Markdown 内容</span>
+                    <textarea name="helpMarkdown" rows="18" spellcheck="false"></textarea>
+                  </label>
+                </div>
+              </div>
+              <footer class="help-editor-actions">
+                <button type="button" class="ghost-button" data-close-help-editor>取消</button>
+                <button type="submit">保存售后政策</button>
+              </footer>
+            </section>
+
+            <section class="help-editor-panel" data-help-panel="priv" hidden>
+              <div class="help-editor-scroll">
+                <div class="help-editor-section">
+                  <h2>隐私政策 Markdown</h2>
+                  <label class="full-span">
+                    <span>上传 Markdown 文件</span>
+                    <span class="upload-field">
+                      <input name="privMarkdownName" placeholder="未选择文件" readonly />
+                      <button type="button" data-markdown-upload="priv">上传 .md</button>
+                    </span>
+                  </label>
+                  <label class="full-span">
+                    <span>Markdown 内容</span>
+                    <textarea name="privMarkdown" rows="18" spellcheck="false"></textarea>
+                  </label>
+                </div>
+              </div>
+              <footer class="help-editor-actions">
+                <button type="button" class="ghost-button" data-close-help-editor>取消</button>
+                <button type="submit">保存隐私政策</button>
+              </footer>
+            </section>
+
+            <section class="help-editor-panel" data-help-panel="tos" hidden>
+              <div class="help-editor-scroll">
+                <div class="help-editor-section">
+                  <h2>服务条款 Markdown</h2>
+                  <label class="full-span">
+                    <span>上传 Markdown 文件</span>
+                    <span class="upload-field">
+                      <input name="tosMarkdownName" placeholder="未选择文件" readonly />
+                      <button type="button" data-markdown-upload="tos">上传 .md</button>
+                    </span>
+                  </label>
+                  <label class="full-span">
+                    <span>Markdown 内容</span>
+                    <textarea name="tosMarkdown" rows="16" spellcheck="false"></textarea>
+                  </label>
+                  <label class="full-span">
+                    <span>下单风险确认文案</span>
+                    <textarea name="checkoutAgreement" rows="5" placeholder="确认本人具备合法购买和使用资格..."></textarea>
+                  </label>
+                </div>
+              </div>
+              <footer class="help-editor-actions">
+                <button type="button" class="ghost-button" data-close-help-editor>取消</button>
+                <button type="submit">保存服务条款</button>
+              </footer>
+            </section>
+          </div>
+          <input id="markdownUploadInput" type="file" accept=".md,text/markdown,text/plain" hidden />
         </form>
       </section>
 

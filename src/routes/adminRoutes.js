@@ -9,6 +9,7 @@ const {
   listAdminContent,
   saveAdminContent,
   updateAdminSiteConfig,
+  updateAdminHelpContent,
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.patch("/admin/orders/:orderId", updateAdminOrder);
 router.get("/admin/content", listAdminContent);
 router.post("/admin/content", saveAdminContent);
 router.patch("/admin/site-config", updateAdminSiteConfig);
+router.patch("/admin/help-content", updateAdminHelpContent);
 
 module.exports = router;

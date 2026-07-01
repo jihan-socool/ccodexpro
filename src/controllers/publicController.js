@@ -2,6 +2,7 @@ const { getAllProducts } = require("../config/products");
 const { publicContent } = require("../services/contentService");
 const { getAiStatus } = require("../services/statusService");
 const { readSiteConfig } = require("../services/siteConfigService");
+const { readHelpContent } = require("../services/helpContentService");
 const { trackVisit } = require("../services/visitorService");
 
 function getProducts(req, res) {
@@ -24,6 +25,10 @@ function getSiteConfig(req, res) {
   res.json({ config: readSiteConfig() });
 }
 
+function getHelpContent(req, res) {
+  res.json({ helpContent: readHelpContent() });
+}
+
 function trackVisitor(req, res) {
   res.json({ visitors: trackVisit() });
 }
@@ -33,5 +38,6 @@ module.exports = {
   getPublishedContent,
   getStatus,
   getSiteConfig,
+  getHelpContent,
   trackVisitor,
 };

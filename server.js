@@ -14,6 +14,7 @@ const errorHandler = require("./src/middleware/errorHandler");
 const { ensureStore } = require("./src/services/orderService");
 const { ensureProductsStore } = require("./src/config/products");
 const { ensureContentStore } = require("./src/services/contentService");
+const { ensureHelpContentStore } = require("./src/services/helpContentService");
 const { ensureSiteConfigStore } = require("./src/services/siteConfigService");
 const { ensureVisitorStore } = require("./src/services/visitorService");
 
@@ -84,6 +85,7 @@ app.listen(port, host, () => {
   ensureStore();
   ensureProductsStore();
   ensureContentStore();
+  ensureHelpContentStore();
   ensureSiteConfigStore();
   ensureVisitorStore();
   console.log(`NEXAI20X site running at http://${host}:${port}`);

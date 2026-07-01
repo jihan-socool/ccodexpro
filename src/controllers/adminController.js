@@ -1,6 +1,7 @@
 const { getAllProducts, updateProduct } = require("../config/products");
 const { queryOrders, updateOrder, publicOrder, formatTime } = require("../services/orderService");
 const { readContent, saveContentItem } = require("../services/contentService");
+const { readHelpContent, writeHelpContent } = require("../services/helpContentService");
 const { readSiteConfig, writeSiteConfig } = require("../services/siteConfigService");
 const { visitorSummary } = require("../services/visitorService");
 const { createAdminSession, validateAdminCredentials } = require("../middleware/adminAuth");
@@ -26,6 +27,7 @@ function getAdminOverview(req, res) {
     orders: queryOrders({ keyword }),
     content: readContent().sort((a, b) => String(b.date).localeCompare(String(a.date))),
     siteConfig: readSiteConfig(),
+    helpContent: readHelpContent(),
     visitors: visitorSummary(),
   });
 }
@@ -132,6 +134,68 @@ function updateAdminSiteConfig(req, res) {
   res.json({ config });
 }
 
+function updateAdminHelpContent(req, res) {
+  const clean = (value) => String(value || "").trim();
+  const normalizeFaqGroups = (value) => {
+    if (!Array.isArray(value)) return [];
+    return value.map((group) => ({
+      title: clean(group.title),
+      items: Array.isArray(group.items)
+        ? group.items.map((item) => ({
+          question: clean(item.question),
+          answer: clean(item.answer),
+        })).filter((item) => item.question && item.answer)
+        : [],
+    })).filter((group) => group.title && group.items.length);
+  };
+  const payload = {
+    supportShowcase: {
+      title: clean(req.body.supportShowcase?.title),
+      description: clean(req.body.supportShowcase?.description),
+      faqHint: clean(req.body.supportShowcase?.faqHint),
+      helpHint: clean(req.body.supportShowcase?.helpHint),
+      privacyHint: clean(req.body.supportShowcase?.privacyHint),
+      termsHint: clean(req.body.supportShowcase?.termsHint),
+    },
+    faq: {
+      eyebrow: clean(req.body.faq?.eyebrow),
+      title: clean(req.body.faq?.title),
+      description: clean(req.body.faq?.description),
+      navTitle: clean(req.body.faq?.navTitle),
+      groups: normalizeFaqGroups(req.body.faq?.groups),
+    },
+    policies: {
+      help: {
+        markdown: String(req.body.policies?.help?.markdown || ""),
+      },
+      priv: {
+        markdown: String(req.body.policies?.priv?.markdown || ""),
+      },
+      tos: {
+        markdown: String(req.body.policies?.tos?.markdown || ""),
+      },
+    },
+    checkoutAgreement: clean(req.body.checkoutAgreement),
+  };
+
+  if (!payload.supportShowcase.title || !payload.faq.title || !payload.faq.groups.length) {
+    return res.status(400).json({ error: "帮助与支持标题、说明和 FAQ 分组不能为空" });
+  }
+
+  for (const [key, policy] of Object.entries(payload.policies)) {
+    if (!String(policy.markdown || "").trim()) {
+      return res.status(400).json({ error: `${key} Markdown 内容不能为空` });
+    }
+  }
+
+  if (!payload.checkoutAgreement) {
+    return res.status(400).json({ error: "下单风险确认文案不能为空" });
+  }
+
+  const helpContent = writeHelpContent(payload);
+  res.json({ helpContent });
+}
+
 module.exports = {
   loginAdmin,
   getAdminOverview,
@@ -141,4 +205,5 @@ module.exports = {
   listAdminContent,
   saveAdminContent,
   updateAdminSiteConfig,
+  updateAdminHelpContent,
 };

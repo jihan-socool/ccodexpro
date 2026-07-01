@@ -6,11 +6,14 @@ const state = {
   orders: [],
   content: [],
   siteConfig: null,
+  helpContent: null,
   visitors: { total: 0, today: 0, history: [] },
   session: localStorage.getItem(sessionKey) || "",
   productPage: 1,
   productsPerPage: 3,
   uploadTarget: "",
+  markdownTarget: "",
+  activeHelpPanel: "",
 };
 
 const statsGrid = document.querySelector("#statsGrid");
@@ -25,6 +28,10 @@ const orderList = document.querySelector("#orderList");
 const contentList = document.querySelector("#contentList");
 const contentForm = document.querySelector("#contentForm");
 const siteConfigForm = document.querySelector("#siteConfigForm");
+const helpContentForm = document.querySelector("#helpContentForm");
+const helpModuleGrid = document.querySelector("#helpModuleGrid");
+const helpEditorLabel = document.querySelector("#helpEditorLabel");
+const helpEditorHint = document.querySelector("#helpEditorHint");
 const loginShell = document.querySelector("#loginShell");
 const loginForm = document.querySelector("#loginForm");
 const adminLayout = document.querySelector("#adminLayout");
@@ -33,7 +40,8 @@ const sidebar = document.querySelector("#adminSidebar");
 const globalSearch = document.querySelector("#globalSearch");
 const adminSearch = document.querySelector(".admin-search");
 const qrUploadInput = document.querySelector("#qrUploadInput");
-const pageIds = ["overview", "orders", "products", "site-config", "content"];
+const markdownUploadInput = document.querySelector("#markdownUploadInput");
+const pageIds = ["overview", "orders", "products", "site-config", "help-content", "content"];
 
 function adminHeaders() {
   return {
@@ -123,6 +131,7 @@ async function loadOverview() {
   state.orders = data.orders || [];
   state.content = data.content || [];
   state.siteConfig = data.siteConfig || null;
+  state.helpContent = data.helpContent || null;
   state.visitors = data.visitors || { total: 0, today: 0, history: [] };
   render();
 }
@@ -134,6 +143,7 @@ function render() {
   renderProducts();
   renderOrders();
   renderSiteConfig();
+  renderHelpContent();
   renderContent();
 }
 
@@ -315,6 +325,118 @@ function renderSiteConfig() {
   siteConfigForm.elements.supportText.value = contacts.supportText || "";
 }
 
+function renderHelpContent() {
+  if (!helpContentForm || !state.helpContent) return;
+  const { supportShowcase = {}, faq = {}, policies = {}, checkoutAgreement = "" } = state.helpContent;
+  helpContentForm.elements.showcaseTitle.value = supportShowcase.title || "";
+  helpContentForm.elements.showcaseDescription.value = supportShowcase.description || "";
+  helpContentForm.elements.faqHint.value = supportShowcase.faqHint || "";
+  helpContentForm.elements.helpHint.value = supportShowcase.helpHint || "";
+  helpContentForm.elements.privacyHint.value = supportShowcase.privacyHint || "";
+  helpContentForm.elements.termsHint.value = supportShowcase.termsHint || "";
+
+  helpContentForm.elements.faqEyebrow.value = faq.eyebrow || "";
+  helpContentForm.elements.faqTitle.value = faq.title || "";
+  helpContentForm.elements.faqDescription.value = faq.description || "";
+  helpContentForm.elements.faqNavTitle.value = faq.navTitle || "";
+  helpContentForm.elements.faqGroups.value = JSON.stringify(faq.groups || [], null, 2);
+
+  for (const key of ["help", "priv", "tos"]) {
+    const policy = policies[key] || {};
+    helpContentForm.elements[`${key}Markdown`].value = policy.markdown || "";
+    helpContentForm.elements[`${key}MarkdownName`].value = policy.markdown ? `${key}.md` : "";
+  }
+
+  helpContentForm.elements.checkoutAgreement.value = checkoutAgreement || "";
+  renderHelpModules();
+}
+
+function helpModuleConfig() {
+  const help = state.helpContent || {};
+  const faqGroups = Array.isArray(help.faq?.groups) ? help.faq.groups : [];
+  return [
+    {
+      key: "faq",
+      title: "常见问题",
+      subtitle: help.faq?.title || "FAQ",
+      summary: `${faqGroups.length} 个分组`,
+      detail: help.supportShowcase?.faqHint || "编辑 FAQ、首页入口和导航说明",
+      cta: "编辑 FAQ",
+    },
+    {
+      key: "help",
+      title: "售后政策",
+      subtitle: "Markdown",
+      summary: help.policies?.help?.markdown ? `${String(help.policies.help.markdown).split(/\r?\n/).length} 行内容` : "未配置",
+      detail: help.supportShowcase?.helpHint || "上传并编辑售后政策 markdown",
+      cta: "编辑政策",
+    },
+    {
+      key: "priv",
+      title: "隐私政策",
+      subtitle: "Markdown",
+      summary: help.policies?.priv?.markdown ? `${String(help.policies.priv.markdown).split(/\r?\n/).length} 行内容` : "未配置",
+      detail: help.supportShowcase?.privacyHint || "上传并编辑隐私政策 markdown",
+      cta: "编辑政策",
+    },
+    {
+      key: "tos",
+      title: "服务条款",
+      subtitle: "Markdown",
+      summary: help.policies?.tos?.markdown ? `${String(help.policies.tos.markdown).split(/\r?\n/).length} 行内容` : "未配置",
+      detail: help.supportShowcase?.termsHint || "上传并编辑服务条款与风险确认文案",
+      cta: "编辑条款",
+    },
+  ];
+}
+
+function renderHelpModules() {
+  if (!helpModuleGrid) return;
+  helpModuleGrid.innerHTML = helpModuleConfig().map((item) => `
+    <article class="help-module-card" data-open-help-panel="${item.key}">
+      <div class="help-module-top">
+        <span class="help-module-kicker">${item.subtitle}</span>
+        <span class="badge">${item.summary}</span>
+      </div>
+      <h2>${item.title}</h2>
+      <p>${item.detail}</p>
+      <button type="button" data-open-help-panel="${item.key}">${item.cta}</button>
+    </article>
+  `).join("");
+}
+
+function openHelpEditor(panel) {
+  state.activeHelpPanel = panel;
+  if (helpContentForm) helpContentForm.hidden = false;
+  document.body.classList.add("help-editor-open");
+  document.querySelectorAll("[data-help-panel]").forEach((node) => {
+    node.hidden = node.dataset.helpPanel !== panel;
+  });
+  const labels = {
+    faq: ["常见问题", "编辑 FAQ、首页入口和页面说明。"],
+    help: ["售后政策", "上传或直接修改售后政策 Markdown。"],
+    priv: ["隐私政策", "上传或直接修改隐私政策 Markdown。"],
+    tos: ["服务条款", "上传或直接修改服务条款，并维护下单风险确认文案。"],
+  };
+  const [label, hint] = labels[panel] || ["帮助与支持", "在弹层内直接编辑并保存。"];
+  if (helpEditorLabel) helpEditorLabel.textContent = label;
+  if (helpEditorHint) helpEditorHint.textContent = hint;
+}
+
+function closeHelpEditor() {
+  state.activeHelpPanel = "";
+  if (helpContentForm) helpContentForm.hidden = true;
+  document.body.classList.remove("help-editor-open");
+}
+
+function parseJsonField(name, value) {
+  try {
+    return JSON.parse(String(value || "").trim() || "[]");
+  } catch (error) {
+    throw new Error(`${name} 不是有效的 JSON`);
+  }
+}
+
 document.querySelector("#reloadBtn").addEventListener("click", async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
@@ -487,6 +609,63 @@ document.addEventListener("submit", async (event) => {
       button.disabled = false;
     }
   }
+
+  if (event.target.id === "helpContentForm") {
+    event.preventDefault();
+    const button = event.target.querySelector("button[type='submit']");
+    const form = new FormData(event.target);
+    button.disabled = true;
+    try {
+      const payload = {
+        supportShowcase: {
+          title: String(form.get("showcaseTitle") || "").trim(),
+          description: String(form.get("showcaseDescription") || "").trim(),
+          faqHint: String(form.get("faqHint") || "").trim(),
+          helpHint: String(form.get("helpHint") || "").trim(),
+          privacyHint: String(form.get("privacyHint") || "").trim(),
+          termsHint: String(form.get("termsHint") || "").trim(),
+        },
+        faq: {
+          eyebrow: String(form.get("faqEyebrow") || "").trim(),
+          title: String(form.get("faqTitle") || "").trim(),
+          description: String(form.get("faqDescription") || "").trim(),
+          navTitle: String(form.get("faqNavTitle") || "").trim(),
+          groups: parseJsonField("FAQ 分组", form.get("faqGroups")),
+        },
+        policies: {
+          help: {
+            markdown: String(form.get("helpMarkdown") || ""),
+          },
+          priv: {
+            markdown: String(form.get("privMarkdown") || ""),
+          },
+          tos: {
+            markdown: String(form.get("tosMarkdown") || ""),
+          },
+        },
+        checkoutAgreement: String(form.get("checkoutAgreement") || "").trim(),
+      };
+
+      const data = await api("/admin/help-content", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+      state.helpContent = data.helpContent;
+      renderHelpContent();
+      const saveLabels = {
+        faq: "FAQ 已保存。",
+        help: "售后政策已保存。",
+        priv: "隐私政策已保存。",
+        tos: "服务条款已保存。",
+      };
+      toastMessage(saveLabels[state.activeHelpPanel] || "帮助与支持内容已保存。");
+      closeHelpEditor();
+    } catch (error) {
+      toastMessage(error.message);
+    } finally {
+      button.disabled = false;
+    }
+  }
 });
 
 document.addEventListener("click", async (event) => {
@@ -497,6 +676,28 @@ document.addEventListener("click", async (event) => {
       qrUploadInput.value = "";
       qrUploadInput.click();
     }
+    return;
+  }
+
+  const markdownUploadButton = event.target.closest("[data-markdown-upload]");
+  if (markdownUploadButton) {
+    state.markdownTarget = markdownUploadButton.dataset.markdownUpload;
+    if (markdownUploadInput) {
+      markdownUploadInput.value = "";
+      markdownUploadInput.click();
+    }
+    return;
+  }
+
+  const openHelpPanel = event.target.closest("[data-open-help-panel]");
+  if (openHelpPanel) {
+    openHelpEditor(openHelpPanel.dataset.openHelpPanel);
+    return;
+  }
+
+  const closeHelpEditorTrigger = event.target.closest("[data-close-help-editor]");
+  if (closeHelpEditorTrigger) {
+    closeHelpEditor();
     return;
   }
 
@@ -575,6 +776,31 @@ if (qrUploadInput) {
     });
     reader.addEventListener("error", () => toastMessage("图片读取失败，请重试。"));
     reader.readAsDataURL(file);
+  });
+}
+
+if (markdownUploadInput) {
+  markdownUploadInput.addEventListener("change", () => {
+    const file = markdownUploadInput.files?.[0];
+    const target = state.markdownTarget;
+    if (!file || !target || !helpContentForm?.elements[`${target}Markdown`]) return;
+    const isMarkdown = file.name.toLowerCase().endsWith(".md") || file.type === "text/markdown" || file.type === "text/plain";
+    if (!isMarkdown) {
+      toastMessage("请选择 .md 文件。");
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      toastMessage("Markdown 文件不能超过 1MB。");
+      return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      helpContentForm.elements[`${target}Markdown`].value = String(reader.result || "");
+      helpContentForm.elements[`${target}MarkdownName`].value = file.name;
+      toastMessage("Markdown 已载入，保存后生效。");
+    });
+    reader.addEventListener("error", () => toastMessage("Markdown 读取失败，请重试。"));
+    reader.readAsText(file, "utf-8");
   });
 }
 

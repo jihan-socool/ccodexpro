@@ -4,6 +4,7 @@ const {
   getPublishedContent,
   getStatus,
   getSiteConfig,
+  getHelpContent,
   trackVisitor,
 } = require("../controllers/publicController");
 
@@ -13,6 +14,7 @@ router.get("/products", getProducts);
 router.get("/content", getPublishedContent);
 router.get("/ai-status", getStatus);
 router.get("/site-config", getSiteConfig);
+router.get("/help-content", getHelpContent);
 router.post("/visitors/track", trackVisitor);
 
 module.exports = router;

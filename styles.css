@@ -1454,8 +1454,26 @@ main {
   padding: 0.7rem 0.8rem;
 }
 
+.support-nav-link {
+  justify-content: flex-start;
+  min-height: 0;
+  border: 3px solid transparent;
+  box-shadow: none;
+  background: transparent;
+  color: #40533c;
+  font-weight: 900;
+  padding: 0.7rem 0.8rem;
+}
+
 .support-nav a:hover {
   border-color: var(--stroke);
+  background: var(--acid-2);
+  color: var(--ink-dark);
+}
+
+.support-nav-link:hover {
+  border-color: var(--stroke);
+  box-shadow: none;
   background: var(--acid-2);
   color: var(--ink-dark);
 }
@@ -1556,32 +1574,51 @@ main {
   padding: 0.55rem 0.8rem;
 }
 
-.policy-section {
-  padding: 1.25rem 0;
+.markdown-body > :first-child {
+  margin-top: 0;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  padding-top: 1.25rem;
   border-top: 3px dashed #879a7c;
-}
-
-.policy-section:first-of-type {
-  border-top: 0;
-}
-
-.policy-section h2 {
-  margin-bottom: 0.55rem;
   font-weight: 1000;
 }
 
-.policy-section p,
-.policy-section li {
+.markdown-body h1:first-child,
+.markdown-body h2:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.markdown-body h1 {
+  font-size: 1.4rem;
+}
+
+.markdown-body h2 {
+  margin-bottom: 0.55rem;
+  font-size: 1.18rem;
+}
+
+.markdown-body p,
+.markdown-body li {
   color: #40533c;
   line-height: 1.82;
   font-weight: 700;
 }
 
-.policy-section ul {
+.markdown-body ul {
   display: grid;
   gap: 0.45rem;
   margin: 0.65rem 0 0;
   padding-left: 1.25rem;
+}
+
+.markdown-body code {
+  border: 1px solid rgba(41, 57, 42, 0.22);
+  border-radius: 8px;
+  background: #fffef2;
+  padding: 0.1rem 0.35rem;
 }
 
 .modal {
