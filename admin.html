@@ -37,6 +37,7 @@
           <p>运营</p>
           <a href="#site-config" data-section-link="site-config"><b>收</b><span>收款联系</span></a>
           <a href="#help-content" data-section-link="help-content"><b>帮</b><span>帮助支持</span></a>
+          <a href="#system-settings" data-section-link="system-settings"><b>设</b><span>系统设置</span></a>
           <a href="#content" data-section-link="content"><b>文</b><span>新闻播客</span></a>
         </nav>
         <a class="sidebar-exit" href="/"><span>返回前台</span></a>
@@ -350,6 +351,24 @@
           </div>
           <input id="markdownUploadInput" type="file" accept=".md,text/markdown,text/plain" hidden />
         </form>
+      </section>
+
+      <section class="admin-page panel" id="system-settings" data-page="system-settings">
+        <div class="panel-head">
+          <div>
+            <h1>系统设置</h1>
+            <p>查看 Git 仓库状态、检查是否有新提交，并执行你在 <code>.env</code> 里预先配置好的更新命令。</p>
+          </div>
+        </div>
+        <div class="system-status-card">
+          <div class="system-status-meta" id="systemStatusMeta"></div>
+          <div class="system-status-view" id="systemStatusView"></div>
+          <div class="system-status-actions">
+            <button type="button" class="ghost-button" id="refreshSystemStatusBtn">刷新状态</button>
+            <button type="button" id="checkSystemUpdatesBtn">检查更新</button>
+            <button type="button" id="runSystemUpdateBtn">执行更新</button>
+          </div>
+        </div>
       </section>
 
       <section class="admin-page panel" id="content" data-page="content">

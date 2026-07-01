@@ -17,6 +17,7 @@ const { ensureContentStore } = require("./src/services/contentService");
 const { ensureHelpContentStore } = require("./src/services/helpContentService");
 const { ensureSiteConfigStore } = require("./src/services/siteConfigService");
 const { ensureVisitorStore } = require("./src/services/visitorService");
+const { ensureSystemUpdateStore } = require("./src/services/systemUpdateService");
 
 const app = express();
 const port = Number(process.env.PORT || 4173);
@@ -88,6 +89,7 @@ app.listen(port, host, () => {
   ensureHelpContentStore();
   ensureSiteConfigStore();
   ensureVisitorStore();
+  ensureSystemUpdateStore();
   console.log(`NEXAI20X site running at http://${host}:${port}`);
   console.log(`Admin panel: http://${host}:${port}/father`);
   console.log(`Payment mode: ${process.env.PAYMENT_MODE || "mock"}`);

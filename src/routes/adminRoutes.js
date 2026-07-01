@@ -10,6 +10,9 @@ const {
   saveAdminContent,
   updateAdminSiteConfig,
   updateAdminHelpContent,
+  getAdminSystemStatus,
+  checkAdminSystemUpdates,
+  runAdminSystemUpdate,
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -24,5 +27,8 @@ router.get("/admin/content", listAdminContent);
 router.post("/admin/content", saveAdminContent);
 router.patch("/admin/site-config", updateAdminSiteConfig);
 router.patch("/admin/help-content", updateAdminHelpContent);
+router.get("/admin/system-status", getAdminSystemStatus);
+router.post("/admin/system-status/check", checkAdminSystemUpdates);
+router.post("/admin/system-status/run", runAdminSystemUpdate);
 
 module.exports = router;

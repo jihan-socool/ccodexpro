@@ -7,6 +7,7 @@ const state = {
   content: [],
   siteConfig: null,
   helpContent: null,
+  systemStatus: null,
   visitors: { total: 0, today: 0, history: [] },
   session: localStorage.getItem(sessionKey) || "",
   productPage: 1,
@@ -14,6 +15,30 @@ const state = {
   uploadTarget: "",
   markdownTarget: "",
   activeHelpPanel: "",
+};
+
+const defaultHelpContent = {
+  supportShowcase: {
+    title: "帮助与支持",
+    description: "",
+    faqHint: "",
+    helpHint: "",
+    privacyHint: "",
+    termsHint: "",
+  },
+  faq: {
+    eyebrow: "Support Manual",
+    title: "帮助与支持",
+    description: "",
+    navTitle: "目录",
+    groups: [],
+  },
+  policies: {
+    help: { title: "售后政策", subtitle: "售后政策", markdown: "" },
+    priv: { title: "隐私政策", subtitle: "隐私政策", markdown: "" },
+    tos: { title: "服务条款", subtitle: "服务条款", markdown: "" },
+  },
+  checkoutAgreement: "",
 };
 
 const statsGrid = document.querySelector("#statsGrid");
@@ -30,6 +55,11 @@ const contentForm = document.querySelector("#contentForm");
 const siteConfigForm = document.querySelector("#siteConfigForm");
 const helpContentForm = document.querySelector("#helpContentForm");
 const helpModuleGrid = document.querySelector("#helpModuleGrid");
+const systemStatusMeta = document.querySelector("#systemStatusMeta");
+const systemStatusView = document.querySelector("#systemStatusView");
+const refreshSystemStatusBtn = document.querySelector("#refreshSystemStatusBtn");
+const checkSystemUpdatesBtn = document.querySelector("#checkSystemUpdatesBtn");
+const runSystemUpdateBtn = document.querySelector("#runSystemUpdateBtn");
 const helpEditorLabel = document.querySelector("#helpEditorLabel");
 const helpEditorHint = document.querySelector("#helpEditorHint");
 const loginShell = document.querySelector("#loginShell");
@@ -41,7 +71,7 @@ const globalSearch = document.querySelector("#globalSearch");
 const adminSearch = document.querySelector(".admin-search");
 const qrUploadInput = document.querySelector("#qrUploadInput");
 const markdownUploadInput = document.querySelector("#markdownUploadInput");
-const pageIds = ["overview", "orders", "products", "site-config", "help-content", "content"];
+const pageIds = ["overview", "orders", "products", "site-config", "help-content", "system-settings", "content"];
 
 function adminHeaders() {
   return {
@@ -83,6 +113,59 @@ function toastMessage(message) {
 
 function money(value) {
   return `¥${Number(value || 0).toFixed(2)}`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function normalizePolicy(policy, fallback) {
+  return {
+    title: String(policy?.title || fallback.title || ""),
+    subtitle: String(policy?.subtitle || fallback.subtitle || fallback.title || ""),
+    markdown: String(policy?.markdown || fallback.markdown || ""),
+  };
+}
+
+function normalizeHelpContent(content) {
+  const defaults = clone(defaultHelpContent);
+  const source = content && typeof content === "object" ? content : {};
+  return {
+    supportShowcase: {
+      ...defaults.supportShowcase,
+      ...(source.supportShowcase || {}),
+    },
+    faq: {
+      ...defaults.faq,
+      ...(source.faq || {}),
+      groups: Array.isArray(source.faq?.groups) ? source.faq.groups : defaults.faq.groups,
+    },
+    policies: {
+      help: normalizePolicy(source.policies?.help, defaults.policies.help),
+      priv: normalizePolicy(source.policies?.priv, defaults.policies.priv),
+      tos: normalizePolicy(source.policies?.tos, defaults.policies.tos),
+    },
+    checkoutAgreement: String(source.checkoutAgreement || defaults.checkoutAgreement || ""),
+  };
+}
+
+function normalizeSystemStatus(systemStatus) {
+  if (!systemStatus || typeof systemStatus !== "object") return null;
+  return {
+    feature: systemStatus.feature || {},
+    repository: systemStatus.repository || {},
+    lastCheck: systemStatus.lastCheck || null,
+    lastRun: systemStatus.lastRun || null,
+  };
 }
 
 function isPaidOrder(order) {
@@ -131,7 +214,8 @@ async function loadOverview() {
   state.orders = data.orders || [];
   state.content = data.content || [];
   state.siteConfig = data.siteConfig || null;
-  state.helpContent = data.helpContent || null;
+  state.helpContent = normalizeHelpContent(data.helpContent);
+  state.systemStatus = normalizeSystemStatus(data.systemStatus);
   state.visitors = data.visitors || { total: 0, today: 0, history: [] };
   render();
 }
@@ -144,6 +228,7 @@ function render() {
   renderOrders();
   renderSiteConfig();
   renderHelpContent();
+  renderSystemStatus();
   renderContent();
 }
 
@@ -351,6 +436,146 @@ function renderHelpContent() {
   renderHelpModules();
 }
 
+function formatDateTime(value) {
+  if (!value) return "未记录";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}
+
+function systemBadge(label, warning = false) {
+  return `<span class="badge${warning ? " podcast" : ""}">${escapeHtml(label)}</span>`;
+}
+
+function renderSystemRows(rows) {
+  return rows.map(([label, value, useCode = false]) => `
+    <div class="system-status-row">
+      <strong>${escapeHtml(label)}</strong>
+      ${useCode ? `<code>${escapeHtml(value || "-")}</code>` : `<span>${escapeHtml(value || "-")}</span>`}
+    </div>
+  `).join("");
+}
+
+function commitSummary(commit) {
+  if (!commit?.sha) return "未获取";
+  const title = String(commit.subject || "").trim();
+  return title ? `${commit.shortSha} · ${title}` : commit.shortSha;
+}
+
+function renderSystemStatus() {
+  if (!systemStatusMeta || !systemStatusView) return;
+  const systemStatus = state.systemStatus;
+
+  if (!systemStatus) {
+    systemStatusMeta.innerHTML = "";
+    systemStatusView.innerHTML = '<p class="empty">暂无系统状态。</p>';
+    if (checkSystemUpdatesBtn) checkSystemUpdatesBtn.disabled = false;
+    if (runSystemUpdateBtn) runSystemUpdateBtn.disabled = true;
+    return;
+  }
+
+  const feature = systemStatus.feature || {};
+  const repository = systemStatus.repository || {};
+  const lastCheck = systemStatus.lastCheck;
+  const lastRun = systemStatus.lastRun;
+  const runStatus = lastRun?.status || "idle";
+  const checkStatus = !lastCheck ? "未执行" : lastCheck.ok ? "成功" : "失败";
+
+  systemStatusMeta.innerHTML = [
+    systemBadge(feature.enabled ? "更新已启用" : "更新未启用", !feature.enabled),
+    systemBadge(feature.commandConfigured ? "已配置更新命令" : "未配置更新命令", !feature.commandConfigured),
+    systemBadge(
+      !repository.available
+        ? "仓库不可用"
+        : repository.updateAvailable
+          ? `待更新 ${repository.localBehind || 0} 提交`
+          : "已是最新",
+      !repository.available || repository.updateAvailable,
+    ),
+    systemBadge(repository.workingTreeDirty ? `工作区有改动 ${repository.dirtyCount || 0}` : "工作区干净", repository.workingTreeDirty),
+    lastRun?.status === "running"
+      ? systemBadge("更新任务执行中")
+      : lastRun?.status === "failed"
+        ? systemBadge("上次更新失败", true)
+        : lastRun?.status === "success"
+          ? systemBadge("上次更新成功")
+          : systemBadge("暂无执行记录"),
+  ].join("");
+
+  const updatePanelNote = feature.commandConfigured
+    ? "点击“执行更新”会运行服务器上预先配置的更新命令。建议该命令自行包含 git pull、依赖安装和服务重启。"
+    : "尚未在 .env 中配置 ADMIN_UPDATE_COMMAND，因此这里只能查看状态，不能执行更新。";
+  const repositoryNote = !repository.remoteUrl
+    ? "当前仓库没有检测到远程仓库配置，无法比较上游版本。"
+    : repository.fetchError
+    ? repository.fetchError
+    : repository.updateAvailable
+      ? `上游分支有 ${repository.localBehind || 0} 个提交尚未同步。`
+      : "本地与上游分支当前没有检测到待同步提交。";
+  const checkNote = lastCheck?.message || "还没有执行过远程更新检查。";
+  const runNote = lastRun?.message || "还没有执行过更新命令。";
+
+  systemStatusView.innerHTML = `
+    <article class="system-status-panel">
+      <h2>更新功能</h2>
+      ${renderSystemRows([
+        ["启用状态", feature.enabled ? "已启用" : "未启用"],
+        ["目标分支", feature.targetBranch || repository.targetBranch || "main"],
+        ["仓库路径", feature.repoPath || repository.repoPath || "-", true],
+        ["日志文件", feature.logFile || "-", true],
+        ["允许脏工作区", feature.allowDirty ? "允许" : "禁止"],
+      ])}
+      <p class="system-status-note">${escapeHtml(updatePanelNote)}</p>
+    </article>
+    <article class="system-status-panel">
+      <h2>仓库状态</h2>
+      ${renderSystemRows([
+        ["当前分支", repository.currentBranch || "-"],
+        ["远程仓库", repository.remoteUrl || repository.remoteName || "-"],
+        ["本地版本", commitSummary(repository.head)],
+        ["上游版本", commitSummary(repository.upstream)],
+        ["提交差异", `领先 ${repository.localAhead ?? 0} / 落后 ${repository.localBehind ?? 0}`],
+        ["工作区", repository.workingTreeDirty ? `有 ${repository.dirtyCount || 0} 个未提交改动` : "干净"],
+      ])}
+      <p class="system-status-note">${escapeHtml(repositoryNote)}</p>
+    </article>
+    <article class="system-status-panel">
+      <h2>最近检查</h2>
+      ${renderSystemRows([
+        ["检查时间", formatDateTime(lastCheck?.checkedAt)],
+        ["检查结果", checkStatus],
+      ])}
+      <p class="system-status-note">${escapeHtml(checkNote)}</p>
+    </article>
+    <article class="system-status-panel">
+      <h2>最近执行</h2>
+      ${renderSystemRows([
+        ["任务状态", runStatus === "running" ? "执行中" : runStatus === "success" ? "成功" : runStatus === "failed" ? "失败" : "未执行"],
+        ["发起人", lastRun?.requestedBy || "-"],
+        ["开始时间", formatDateTime(lastRun?.startedAt)],
+        ["完成时间", formatDateTime(lastRun?.finishedAt)],
+        ["退出码", lastRun?.exitCode ?? "-"],
+        ["日志位置", lastRun?.logFile || feature.logFile || "-", true],
+      ])}
+      <p class="system-status-note">${escapeHtml(runNote)}</p>
+    </article>
+  `;
+
+  if (checkSystemUpdatesBtn) checkSystemUpdatesBtn.disabled = !repository.available;
+  if (runSystemUpdateBtn) {
+    runSystemUpdateBtn.disabled = !feature.canRunUpdate || !repository.available || lastRun?.status === "running";
+    runSystemUpdateBtn.textContent = lastRun?.status === "running" ? "更新中..." : "执行更新";
+  }
+}
+
 function helpModuleConfig() {
   const help = state.helpContent || {};
   const faqGroups = Array.isArray(help.faq?.groups) ? help.faq.groups : [];
@@ -435,6 +660,30 @@ function parseJsonField(name, value) {
   } catch (error) {
     throw new Error(`${name} 不是有效的 JSON`);
   }
+}
+
+function setSystemButtonsBusy(button, label) {
+  [refreshSystemStatusBtn, checkSystemUpdatesBtn, runSystemUpdateBtn].forEach((item) => {
+    if (!item) return;
+    item.dataset.idleLabel = item.dataset.idleLabel || item.textContent;
+    item.disabled = true;
+  });
+  if (button) button.textContent = label;
+}
+
+function resetSystemButtons() {
+  [refreshSystemStatusBtn, checkSystemUpdatesBtn, runSystemUpdateBtn].forEach((item) => {
+    if (!item) return;
+    item.textContent = item.dataset.idleLabel || item.textContent;
+  });
+  renderSystemStatus();
+}
+
+async function loadSystemStatus(path = "/admin/system-status", options = {}) {
+  const data = await api(path, options);
+  state.systemStatus = normalizeSystemStatus(data.systemStatus);
+  renderSystemStatus();
+  return state.systemStatus;
 }
 
 document.querySelector("#reloadBtn").addEventListener("click", async (event) => {
@@ -801,6 +1050,51 @@ if (markdownUploadInput) {
     });
     reader.addEventListener("error", () => toastMessage("Markdown 读取失败，请重试。"));
     reader.readAsText(file, "utf-8");
+  });
+}
+
+if (refreshSystemStatusBtn) {
+  refreshSystemStatusBtn.addEventListener("click", async () => {
+    setSystemButtonsBusy(refreshSystemStatusBtn, "刷新中...");
+    try {
+      await loadSystemStatus();
+      toastMessage("系统状态已刷新。");
+    } catch (error) {
+      toastMessage(error.message);
+    } finally {
+      resetSystemButtons();
+    }
+  });
+}
+
+if (checkSystemUpdatesBtn) {
+  checkSystemUpdatesBtn.addEventListener("click", async () => {
+    setSystemButtonsBusy(checkSystemUpdatesBtn, "检查中...");
+    try {
+      const systemStatus = await loadSystemStatus("/admin/system-status/check", { method: "POST" });
+      toastMessage(systemStatus?.lastCheck?.message || "已完成更新检查。");
+    } catch (error) {
+      toastMessage(error.message);
+    } finally {
+      resetSystemButtons();
+    }
+  });
+}
+
+if (runSystemUpdateBtn) {
+  runSystemUpdateBtn.addEventListener("click", async () => {
+    const confirmed = window.confirm("这会执行服务器上预先配置的更新命令，可能会拉取代码、安装依赖并重启服务。确定继续吗？");
+    if (!confirmed) return;
+
+    setSystemButtonsBusy(runSystemUpdateBtn, "执行中...");
+    try {
+      await loadSystemStatus("/admin/system-status/run", { method: "POST" });
+      toastMessage("更新任务已启动，请稍后刷新查看结果。");
+    } catch (error) {
+      toastMessage(error.message);
+    } finally {
+      resetSystemButtons();
+    }
   });
 }
 

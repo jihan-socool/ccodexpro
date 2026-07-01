@@ -21,6 +21,27 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function policyTitleFromKey(key) {
+  const labels = {
+    help: "售后政策",
+    priv: "隐私政策",
+    tos: "服务条款",
+  };
+  return labels[key] || "帮助与支持";
+}
+
+function policySubtitleFromMarkdown(markdown, fallback) {
+  const lines = String(markdown || "").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (/^((生效日期|最后更新)：)/.test(trimmed)) continue;
+    if (/^#\s+/.test(trimmed)) return trimmed.replace(/^#\s+/, "").trim() || fallback;
+    break;
+  }
+  return fallback;
+}
+
 function legacyPolicyToMarkdown(policy = {}) {
   const lines = [];
   const effectiveDate = String(policy.effectiveDate || "").trim();
@@ -83,10 +104,13 @@ function mergeHelpContent(content = {}) {
 
   for (const key of Object.keys(defaults.policies)) {
     const current = content.policies?.[key] || {};
+    const markdown = String(current.markdown || "").trim()
+      || legacyPolicyToMarkdown(current)
+      || defaults.policies[key].markdown;
     next.policies[key] = {
-      markdown: String(current.markdown || "").trim()
-        || legacyPolicyToMarkdown(current)
-        || defaults.policies[key].markdown,
+      title: String(current.title || "").trim() || policyTitleFromKey(key),
+      subtitle: String(current.subtitle || "").trim() || policySubtitleFromMarkdown(markdown, policyTitleFromKey(key)),
+      markdown,
     };
   }
 
