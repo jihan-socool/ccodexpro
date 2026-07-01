@@ -139,9 +139,9 @@ const defaultHelpContent = window.DEFAULT_HELP_CONTENT || {
     groups: [],
   },
   policies: {
-    help: { markdown: "" },
-    priv: { markdown: "" },
-    tos: { markdown: "" },
+    help: { title: "售后政策", subtitle: "售后政策", markdown: "" },
+    priv: { title: "隐私政策", subtitle: "隐私政策", markdown: "" },
+    tos: { title: "服务条款", subtitle: "服务条款", markdown: "" },
   },
   checkoutAgreement: "",
 };
@@ -175,6 +175,10 @@ const state = {
   },
   helpContent: JSON.parse(JSON.stringify(defaultHelpContent)),
 };
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
 
 const paymentLabels = {
   alipay: "支付宝",
@@ -251,6 +255,35 @@ function escapeHtml(value) {
 
 function helpContent() {
   return state.helpContent || defaultHelpContent;
+}
+
+function normalizePolicy(policy, fallback) {
+  const markdown = String(policy?.markdown || fallback.markdown || "");
+  const title = String(policy?.title || fallback.title || "");
+  const subtitle = String(policy?.subtitle || fallback.subtitle || title);
+  return { title, subtitle, markdown };
+}
+
+function normalizeHelpContent(content) {
+  const defaults = clone(defaultHelpContent);
+  const source = content && typeof content === "object" ? content : {};
+  return {
+    supportShowcase: {
+      ...defaults.supportShowcase,
+      ...(source.supportShowcase || {}),
+    },
+    faq: {
+      ...defaults.faq,
+      ...(source.faq || {}),
+      groups: Array.isArray(source.faq?.groups) ? source.faq.groups : defaults.faq.groups,
+    },
+    policies: {
+      help: normalizePolicy(source.policies?.help, defaults.policies.help),
+      priv: normalizePolicy(source.policies?.priv, defaults.policies.priv),
+      tos: normalizePolicy(source.policies?.tos, defaults.policies.tos),
+    },
+    checkoutAgreement: String(source.checkoutAgreement || defaults.checkoutAgreement || ""),
+  };
 }
 
 function escapeAttr(value) {
@@ -358,10 +391,7 @@ async function loadHelpContent() {
   try {
     const data = await api("/help-content");
     if (data.helpContent) {
-      state.helpContent = {
-        ...defaultHelpContent,
-        ...data.helpContent,
-      };
+      state.helpContent = normalizeHelpContent(data.helpContent);
     }
   } catch (error) {
     toastMessage(`使用默认帮助内容：${error.message}`);
@@ -469,7 +499,7 @@ async function refreshAiStatus() {
 
 function render() {
   const route = currentRoute();
-  const policies = helpContent().policies;
+  const policies = normalizeHelpContent(helpContent()).policies;
   mobileMenu.classList.remove("open");
   mobileMenu.setAttribute("aria-hidden", "true");
 

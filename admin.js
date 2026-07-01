@@ -16,6 +16,30 @@ const state = {
   activeHelpPanel: "",
 };
 
+const defaultHelpContent = {
+  supportShowcase: {
+    title: "帮助与支持",
+    description: "",
+    faqHint: "",
+    helpHint: "",
+    privacyHint: "",
+    termsHint: "",
+  },
+  faq: {
+    eyebrow: "Support Manual",
+    title: "帮助与支持",
+    description: "",
+    navTitle: "目录",
+    groups: [],
+  },
+  policies: {
+    help: { title: "售后政策", subtitle: "售后政策", markdown: "" },
+    priv: { title: "隐私政策", subtitle: "隐私政策", markdown: "" },
+    tos: { title: "服务条款", subtitle: "服务条款", markdown: "" },
+  },
+  checkoutAgreement: "",
+};
+
 const statsGrid = document.querySelector("#statsGrid");
 const miniBars = document.querySelector("#miniBars");
 const incomeList = document.querySelector("#incomeList");
@@ -85,6 +109,40 @@ function money(value) {
   return `¥${Number(value || 0).toFixed(2)}`;
 }
 
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function normalizePolicy(policy, fallback) {
+  return {
+    title: String(policy?.title || fallback.title || ""),
+    subtitle: String(policy?.subtitle || fallback.subtitle || fallback.title || ""),
+    markdown: String(policy?.markdown || fallback.markdown || ""),
+  };
+}
+
+function normalizeHelpContent(content) {
+  const defaults = clone(defaultHelpContent);
+  const source = content && typeof content === "object" ? content : {};
+  return {
+    supportShowcase: {
+      ...defaults.supportShowcase,
+      ...(source.supportShowcase || {}),
+    },
+    faq: {
+      ...defaults.faq,
+      ...(source.faq || {}),
+      groups: Array.isArray(source.faq?.groups) ? source.faq.groups : defaults.faq.groups,
+    },
+    policies: {
+      help: normalizePolicy(source.policies?.help, defaults.policies.help),
+      priv: normalizePolicy(source.policies?.priv, defaults.policies.priv),
+      tos: normalizePolicy(source.policies?.tos, defaults.policies.tos),
+    },
+    checkoutAgreement: String(source.checkoutAgreement || defaults.checkoutAgreement || ""),
+  };
+}
+
 function isPaidOrder(order) {
   const status = String(order.status || "");
   return status.includes("待交付") || status.includes("已支付") || status.includes("已交付");
@@ -131,7 +189,7 @@ async function loadOverview() {
   state.orders = data.orders || [];
   state.content = data.content || [];
   state.siteConfig = data.siteConfig || null;
-  state.helpContent = data.helpContent || null;
+  state.helpContent = normalizeHelpContent(data.helpContent);
   state.visitors = data.visitors || { total: 0, today: 0, history: [] };
   render();
 }
