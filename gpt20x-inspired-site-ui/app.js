@@ -419,7 +419,7 @@ function renderPay() {
       <div class="payment-panel reveal">
         <span class="eyebrow">Portal Gateway</span>
         <h2>扫码穿过支付门。</h2>
-        <p>${state.paymentInfo?.mode === "live" ? "当前为真实网关返回" : "当前为 mock 演示二维码"}，请使用${paymentLabels[state.payment]}完成支付。</p>
+        <p>${state.paymentInfo?.mode === "live" ? "当前为真实网关返回，" : ""}请使用${paymentLabels[state.payment]}完成支付。</p>
         <div class="pay-tabs">
           ${Object.entries(paymentLabels).map(([key, label]) => `<button class="${state.payment === key ? "active" : ""}" type="button" data-pay="${key}">${label}</button>`).join("")}
         </div>
@@ -483,7 +483,7 @@ async function renderQuery() {
       <div class="query-hero reveal">
         <span class="eyebrow">Order Radar</span>
         <h1>把订单从虫洞里捞出来。</h1>
-        <p>通过 server.js 运行时，请求后端 /api/orders；直接打开文件时，查询本地演示订单。</p>
+        <p>可输入订单号或联系方式查询订单。</p>
         <form class="query-form" id="queryForm">
           <input name="keyword" placeholder="请输入订单号或联系方式..." />
           <button type="submit">立即查询</button>

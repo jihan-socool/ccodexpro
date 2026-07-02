@@ -284,7 +284,11 @@ a {
   line-height: 1;
 }
 
-.icon-button.is-spinning {
+.icon-button-glyph {
+  display: inline-block;
+}
+
+.icon-button.is-spinning .icon-button-glyph {
   animation: spin-refresh 0.7s linear infinite;
 }
 
