@@ -50,6 +50,7 @@ PORT=4173
 
 DATA_STORE=sqlite
 SQLITE_PATH=/opt/nexai20x-data/app.sqlite
+BODY_LIMIT=10mb
 
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=强密码
@@ -59,6 +60,12 @@ PAYMENT_MODE=mock
 ```
 
 正式支付时再配置支付宝、微信、USDT 环境变量。
+
+`BODY_LIMIT` 控制 Express 接收 JSON / 表单请求体的最大大小。后台二维码上传会把图片转成 base64 字符串后随 JSON 提交，图片较大时需要调高这个值，例如 `10mb` 或 `20mb`。修改后执行：
+
+```bash
+pm2 restart nexai20x --update-env
+```
 
 ## 后台检查更新
 

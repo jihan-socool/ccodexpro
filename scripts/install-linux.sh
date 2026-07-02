@@ -10,6 +10,7 @@ ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
 DATA_STORE="${DATA_STORE:-sqlite}"
 DATA_DIR="${DATA_DIR:-/opt/nexai20x-data}"
 SQLITE_PATH="${SQLITE_PATH:-$DATA_DIR/app.sqlite}"
+BODY_LIMIT="${BODY_LIMIT:-10mb}"
 SOURCE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 if [[ $EUID -ne 0 ]]; then
@@ -86,6 +87,7 @@ PORT=$PORT
 
 DATA_STORE=$DATA_STORE
 SQLITE_PATH=$SQLITE_PATH
+BODY_LIMIT=$BODY_LIMIT
 
 ADMIN_USERNAME=$ADMIN_USERNAME
 ADMIN_PASSWORD=$ADMIN_PASSWORD
@@ -157,6 +159,7 @@ echo "Admin username: $ADMIN_USERNAME"
 echo "Admin password: $ADMIN_PASSWORD"
 echo "Data store: $DATA_STORE"
 echo "SQLite path: $SQLITE_PATH"
+echo "Body limit: $BODY_LIMIT"
 echo
 echo "Useful commands:"
 echo "  pm2 status"

@@ -22,6 +22,7 @@ const { ensureSystemUpdateStore } = require("./src/services/systemUpdateService"
 const app = express();
 const port = Number(process.env.PORT || 4173);
 const host = process.env.HOST || "0.0.0.0";
+const bodyLimit = process.env.BODY_LIMIT || "10mb";
 
 // 安全和日志中间件
 app.use(helmet({
@@ -43,8 +44,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/payments/callback", rawBodyCapture);
 
 // JSON body解析
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: bodyLimit }));
+app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
 
 // API 路由
 app.use("/api", publicRoutes);
